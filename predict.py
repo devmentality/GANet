@@ -139,7 +139,7 @@ def test(leftname, rightname, savename):
         temp = temp[0, :, :]
 
     print(f"Saveimage shape:")
-    saveimage = np.zeros(temp.shape[0], temp.shape[1], 3)
+    saveimage = np.zeros((temp.shape[0], temp.shape[1], 3))
     saveimage[:, :, 0] = temp
     saveimage[:, :, 1] = temp
     saveimage[:, :, 2] = temp

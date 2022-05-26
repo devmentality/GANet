@@ -139,8 +139,14 @@ def test(leftname, rightname, savename):
         temp = temp[0, :, :]
 
     print(f"Saveimage shape:")
-    print(temp.shape)
-    skimage.io.imsave(savename, (temp * 256).astype('uint16'))
+    saveimage = np.zeros(temp.shape[0], temp.shape[1], 3)
+    saveimage[:, :, 0] = temp
+    saveimage[:, :, 1] = temp
+    saveimage[:, :, 2] = temp
+    saveimage = np.minimum((saveimage * 256), 255).astype('uint8')
+
+    print(saveimage.shape)
+    skimage.io.imsave(savename, saveimage)
 
    
 if __name__ == "__main__":

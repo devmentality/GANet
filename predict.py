@@ -160,5 +160,6 @@ if __name__ == "__main__":
             leftname = file_path + 'frames_finalpass/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'frames_finalpass/' + path_prefix + 'right/' + img_name
 
-        savename = opt.save_path + current_file[0: len(current_file) - 1]
+        image_name = current_file.rsplit('/', maxsplit=1)[-1]
+        savename = opt.save_path + image_name
         test(leftname, rightname, savename)

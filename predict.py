@@ -90,6 +90,7 @@ def test_transform(temp_data, crop_height, crop_width):
     right[0, :, :, :] = temp_data[3: 6, :, :]
     return torch.from_numpy(left).float(), torch.from_numpy(right).float(), h, w
 
+
 def load_data(leftname, rightname):
     left = Image.open(leftname)
     right = Image.open(rightname)
@@ -114,14 +115,14 @@ def load_data(leftname, rightname):
     temp_data[5, :, :] = (b - np.mean(b[:])) / np.std(b[:])
     return temp_data
 
+
 def test(leftname, rightname, savename):
   #  count=0
     
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
 
-    
-    input1 = Variable(input1, requires_grad = False)
-    input2 = Variable(input2, requires_grad = False)
+    input1 = Variable(input1, requires_grad=False)
+    input2 = Variable(input2, requires_grad=False)
 
     model.eval()
     if cuda:
@@ -136,6 +137,9 @@ def test(leftname, rightname, savename):
         temp = temp[0, opt.crop_height - height: opt.crop_height, opt.crop_width - width: opt.crop_width]
     else:
         temp = temp[0, :, :]
+
+    print(f"Saveimage shape:")
+    print(temp.shape)
     skimage.io.imsave(savename, (temp * 256).astype('uint16'))
 
    
@@ -153,7 +157,7 @@ if __name__ == "__main__":
             leftname = file_path + 'colored_0/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'colored_1/' + current_file[0: len(current_file) - 1]
         if opt.sceneflow:
-            print("Running for sceneflow")
+            print(f"Running for sceneflow {index}")
             path_prefix = current_file[0: len(current_file) - 14]
             img_name = current_file[len(current_file) - 9: len(current_file) - 1]
 
@@ -162,4 +166,5 @@ if __name__ == "__main__":
 
         image_name = current_file.rsplit('/', maxsplit=1)[-1]
         savename = opt.save_path + image_name
+        print(f"Savename = {savename}")
         test(leftname, rightname, savename)

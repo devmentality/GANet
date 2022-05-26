@@ -138,14 +138,13 @@ def test(leftname, rightname, savename):
     else:
         temp = temp[0, :, :]
 
-    print(temp)
     print(f"Saveimage name {savename} shape:")
     # saveimage = np.zeros((temp.shape[0], temp.shape[1], 3))
     # saveimage[:, :, 0] = temp
     # saveimage[:, :, 1] = temp
     # saveimage[:, :, 2] = temp
 
-    saveimage = np.minimum((temp * 256), 255).astype('uint8')
+    saveimage = np.minimum(temp, 255).astype('uint8')
     print(saveimage)
 
     print(saveimage.shape)
@@ -173,7 +172,6 @@ if __name__ == "__main__":
             leftname = file_path + 'frames_finalpass/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'frames_finalpass/' + path_prefix + 'right/' + img_name
 
-        image_name = current_file.rsplit('/', maxsplit=1)[-1]
+        image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
         savename = opt.save_path + image_name
-        print(f"Savename = {savename}")
         test(leftname, rightname, savename)

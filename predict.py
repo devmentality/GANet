@@ -138,6 +138,7 @@ def test(leftname, rightname, savename):
     else:
         temp = temp[0, :, :]
 
+    print(temp)
     print(f"Saveimage name {savename} shape:")
     # saveimage = np.zeros((temp.shape[0], temp.shape[1], 3))
     # saveimage[:, :, 0] = temp
@@ -145,6 +146,7 @@ def test(leftname, rightname, savename):
     # saveimage[:, :, 2] = temp
 
     saveimage = np.minimum((temp * 256), 255).astype('uint8')
+    print(saveimage)
 
     print(saveimage.shape)
     skimage.io.imsave(savename, saveimage)

@@ -165,9 +165,15 @@ if __name__ == "__main__":
         if opt.kitti2015:
             leftname = file_path + 'image_2/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'image_3/' + current_file[0: len(current_file) - 1]
+            image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
+            savename = opt.save_path + image_name
+
         if opt.kitti:
             leftname = file_path + 'colored_0/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'colored_1/' + current_file[0: len(current_file) - 1]
+            image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
+            savename = opt.save_path + image_name
+
         if opt.sceneflow:
             print(f"Running for sceneflow {index}")
             path_prefix = current_file[0: len(current_file) - 14]
@@ -175,11 +181,13 @@ if __name__ == "__main__":
 
             leftname = file_path + 'frames_finalpass/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'frames_finalpass/' + path_prefix + 'right/' + img_name
+            image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
+            savename = opt.save_path + image_name
+
         if opt.mvs3d:
             print(f"Running for mvs3d {current_file}")
             leftname = file_path + current_file[:-1] + '_LEFT_RGB.tif'
             rightname = file_path + current_file[:-1] + '_RIGHT_RGB.tif'
+            savename = opt.save_path + current_file[:-1] + '.png'
 
-        image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
-        savename = opt.save_path + image_name
         test(leftname, rightname, savename)

@@ -177,8 +177,8 @@ if __name__ == "__main__":
             rightname = file_path + 'frames_finalpass/' + path_prefix + 'right/' + img_name
         if opt.mvs3d:
             print(f"Running for mvs3d {current_file}")
-            leftname = file_path + '_LEFT_RGB.tif'
-            rightname = file_path + '_RIGHT_RGB.tif'
+            leftname = file_path + current_file + '_LEFT_RGB.tif'
+            rightname = file_path + current_file + '_RIGHT_RGB.tif'
 
         image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
         savename = opt.save_path + image_name

@@ -27,13 +27,17 @@ parser.add_argument('--crop_width', type=int, required=True, help="crop width")
 parser.add_argument('--max_disp', type=int, default=192, help="max disp")
 parser.add_argument('--resume', type=str, default='', help="resume from saved model")
 parser.add_argument('--cuda', type=bool, default=True, help='use cuda?')
-parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
-parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
-parser.add_argument('--sceneflow', type=int, default=0, help='Scene flow? Default=False')
 parser.add_argument('--data_path', type=str, required=True, help="data root")
 parser.add_argument('--test_list', type=str, required=True, help="training list")
 parser.add_argument('--save_path', type=str, default='./result/', help="location to save result")
 parser.add_argument('--model', type=str, default='GANet_deep', help="model to train")
+
+# Datasets
+parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
+parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
+parser.add_argument('--sceneflow', type=int, default=0, help='Scene flow? Default=False')
+parser.add_argument('--mvs3d', type=int, default=0, help='MVS3D? Default=false')
+
 
 opt = parser.parse_args()
 
@@ -171,6 +175,10 @@ if __name__ == "__main__":
 
             leftname = file_path + 'frames_finalpass/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'frames_finalpass/' + path_prefix + 'right/' + img_name
+        if opt.mvs3d:
+            print(f"Running for mvs3d {current_file}")
+            leftname = file_path + '_LEFT_RGB.tif'
+            rightname = file_path + '_RIGHT_RGB.tif'
 
         image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
         savename = opt.save_path + image_name

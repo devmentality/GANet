@@ -13,7 +13,6 @@ import numpy as np
 
 
 class BasicConv(nn.Module):
-
     def __init__(self, in_channels, out_channels, deconv=False, is_3d=False, bn=True, relu=True, **kwargs):
         super(BasicConv, self).__init__()
 #        print(in_channels, out_channels, deconv, is_3d, bn, relu, kwargs)
@@ -42,7 +41,6 @@ class BasicConv(nn.Module):
 
 
 class Conv2x(nn.Module):
-
     def __init__(self, in_channels, out_channels, deconv=False, is_3d=False, concat=True, bn=True, relu=True):
         super(Conv2x, self).__init__()
         self.concat = concat
@@ -135,6 +133,7 @@ class Feature(nn.Module):
 
         return x
 
+
 class Guidance(nn.Module):
     def __init__(self):
         super(Guidance, self).__init__()
@@ -201,8 +200,8 @@ class Guidance(nn.Module):
             ('lg1', lg1),
             ('lg2', lg2)])
 
-class Disp(nn.Module):
 
+class Disp(nn.Module):
     def __init__(self, maxdisp=192):
         super(Disp, self).__init__()
         self.maxdisp = maxdisp
@@ -218,8 +217,8 @@ class Disp(nn.Module):
 
         return self.disparity(x)
 
-class DispAgg(nn.Module):
 
+class DispAgg(nn.Module):
     def __init__(self, maxdisp=192):
         super(DispAgg, self).__init__()
         self.maxdisp = maxdisp
@@ -245,6 +244,7 @@ class DispAgg(nn.Module):
         x = self.lga(x, lg2)
         x = F.normalize(x, p=1, dim=1)
         return self.disparity(x)
+
 
 class SGABlock(nn.Module):
     def __init__(self, channels=32, refine=False):
@@ -314,9 +314,7 @@ class CostAggregation(nn.Module):
         self.disp1 = Disp(self.maxdisp)
         self.disp2 = DispAgg(self.maxdisp)
 
-
     def forward(self, x, g):
-        
         x = self.conv_start(x)
         x = self.sga1(x, g['sg1'])
         rem0 = x
@@ -361,6 +359,7 @@ class CostAggregation(nn.Module):
             return disp0, disp1, disp2
         else:
             return disp2
+
 
 class GANet(nn.Module):
     def __init__(self, maxdisp=192):

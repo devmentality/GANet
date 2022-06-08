@@ -28,13 +28,15 @@ parser.add_argument('--crop_width', type=int, required=True, help="crop width")
 parser.add_argument('--max_disp', type=int, default=192, help="max disp")
 parser.add_argument('--resume', type=str, default='', help="resume from saved model")
 parser.add_argument('--cuda', type=bool, default=True, help='use cuda?')
-parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
-parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
 parser.add_argument('--data_path', type=str, required=True, help="data root")
 parser.add_argument('--test_list', type=str, required=True, help="training list")
 parser.add_argument('--save_path', type=str, default='./result/', help="location to save result")
 parser.add_argument('--threshold', type=float, default=3.0, help="threshold of error rates")
 parser.add_argument('--multi_gpu', type=int, default=0, help="multi_gpu choice")
+
+parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
+parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
+parser.add_argument('--dfc2019', type=int, default=0, help='DFC2019? Default=false')
 
 opt = parser.parse_args()
 
@@ -142,6 +144,7 @@ def load_data(leftname, rightname):
     temp_data[5, :, :] = (b - np.mean(b[:])) / np.std(b[:])
     return temp_data
 
+
 def test(leftname, rightname, savename):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
     input1 = Variable(input1, requires_grad = False)
@@ -168,30 +171,40 @@ if __name__ == "__main__":
     file_path = opt.data_path
     file_list = opt.test_list
     f = open(file_list, 'r')
-    filelist = f.readlines()
+    filelist = [line[:-1] for line in f.readlines()]
     avg_error = 0
     avg_rate = 0
     for index in range(len(filelist)):
         current_file = filelist[index]
         if opt.kitti2015:
-            leftname = file_path + 'image_2/' + current_file[0: len(current_file) - 1]
-            rightname = file_path + 'image_3/' + current_file[0: len(current_file) - 1]
-            dispname = file_path + 'disp_occ_0/' + current_file[0: len(current_file) - 1]
-            savename = opt.save_path + current_file[0: len(current_file) - 1]
+            leftname = file_path + 'image_2/' + current_file
+            rightname = file_path + 'image_3/' + current_file
+            dispname = file_path + 'disp_occ_0/' + current_file
+            savename = opt.save_path + current_file
             disp = Image.open(dispname)
             disp = np.asarray(disp) / 256.0
         elif opt.kitti:
-            leftname = file_path + 'colored_0/' + current_file[0: len(current_file) - 1]
-            rightname = file_path + 'colored_1/' + current_file[0: len(current_file) - 1]
-            dispname = file_path + 'disp_occ/' + current_file[0: len(current_file) - 1]
-            savename = opt.save_path + current_file[0: len(current_file) - 1]
+            leftname = file_path + 'colored_0/' + current_file
+            rightname = file_path + 'colored_1/' + current_file
+            dispname = file_path + 'disp_occ/' + current_file
+            savename = opt.save_path + current_file
             disp = Image.open(dispname)
             disp = np.asarray(disp) / 256.0
 
+        elif opt.dfc2019:
+            print(f"Running for dfc2019 {current_file}")
+            leftname = file_path + current_file + '_LEFT_RGB.tif'
+            rightname = file_path + current_file + '_RIGHT_RGB.tif'
+
+            _, sample_name = current_file.rsplit('/', maxsplit=1)
+            dispname = file_path + 'Track2-Truth/' + current_file + '_LEFT_DSP.tif'
+            savename = opt.save_path + current_file + '.png'
+            disp = Image.open(dispname)
+
         else:
-            leftname = opt.data_path + 'frames_finalpass/' + current_file[0: len(current_file) - 1]
-            rightname = opt.data_path + 'frames_finalpass/' + current_file[0: len(current_file) - 14] + 'right/' + current_file[len(current_file) - 9:len(current_file) - 1]
-            dispname = opt.data_path + 'disparity/' + current_file[0: len(current_file) - 4] + 'pfm'
+            leftname = opt.data_path + 'frames_finalpass/' + current_file
+            rightname = opt.data_path + 'frames_finalpass/' + current_file[:len(current_file) - 13] + 'right/' + current_file[len(current_file) - 8:]
+            dispname = opt.data_path + 'disparity/' + current_file[:len(current_file) - 3] + 'pfm'
             savename = opt.save_path + str(index) + '.png'
             disp, height, width = readPFM(dispname)
        
@@ -202,7 +215,7 @@ if __name__ == "__main__":
         rate = np.sum(np.abs(prediction[mask] - disp[mask]) > opt.threshold) / np.sum(mask)        
         avg_error += error
         avg_rate += rate
-        print("===> Frame {}: ".format(index) + current_file[0:len(current_file)-1] + " ==> EPE Error: {:.4f}, Error Rate: {:.4f}".format(error, rate))
+        print("===> Frame {}: ".format(index) + current_file + " ==> EPE Error: {:.4f}, Error Rate: {:.4f}".format(error, rate))
     avg_error = avg_error / len(filelist)
     avg_rate = avg_rate / len(filelist)
     print("===> Total {} Frames ==> AVG EPE Error: {:.4f}, AVG Error Rate: {:.4f}".format(len(filelist), avg_error, avg_rate))

@@ -36,7 +36,7 @@ parser.add_argument('--model', type=str, default='GANet_deep', help="model to tr
 parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
 parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
 parser.add_argument('--sceneflow', type=int, default=0, help='Scene flow? Default=False')
-parser.add_argument('--mvs3d', type=int, default=0, help='MVS3D? Default=false')
+parser.add_argument('--dfc2019', type=int, default=0, help='DFC2019? Default=false')
 
 
 opt = parser.parse_args()
@@ -184,8 +184,8 @@ if __name__ == "__main__":
             image_name = current_file.rsplit('/', maxsplit=1)[-1][:-1]
             savename = opt.save_path + image_name
 
-        if opt.mvs3d:
-            print(f"Running for mvs3d {current_file}")
+        if opt.dfc2019:
+            print(f"Running for dfc2019 {current_file}")
             leftname = file_path + current_file[:-1] + '_LEFT_RGB.tif'
             rightname = file_path + current_file[:-1] + '_RIGHT_RGB.tif'
             savename = opt.save_path + current_file[:-1] + '.png'

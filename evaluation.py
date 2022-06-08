@@ -104,17 +104,17 @@ def readPFM(file):
     return img, height, width
 
 
-def crop_array(arr, crop_height, crop_width):
-    n_layers, h, w = np.shape(arr)
+def crop_2d_array(arr, crop_height, crop_width):
+    h, w = np.shape(arr)
 
     if h <= crop_height and w <= crop_width:
         temp = arr
-        temp_data = np.zeros([n_layers, crop_height, crop_width], 'float32')
-        temp_data[:, crop_height - h: crop_height, crop_width - w: crop_width] = temp
+        temp_data = np.zeros([crop_height, crop_width], 'float32')
+        temp_data[crop_height - h: crop_height, crop_width - w: crop_width] = temp
     else:
         start_x = int((w - crop_width) / 2)
         start_y = int((h - crop_height) / 2)
-        arr = arr[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
+        arr = arr[start_y: start_y + crop_height, start_x: start_x + crop_width]
 
     return arr
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
             disp, height, width = readPFM(dispname)
        
         prediction = test(leftname, rightname, savename)
-        disp = crop_array(disp, opt.crop_height, opt.crop_width)
+        disp = crop_2d_array(disp, opt.crop_height, opt.crop_width)
         mask = np.logical_and(disp >= 0.001, disp <= opt.max_disp)
 
         error = np.mean(np.abs(prediction[mask] - disp[mask]))

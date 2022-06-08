@@ -103,8 +103,24 @@ def readPFM(file):
         img = np.flipud(img)
     return img, height, width
 
+
+def crop_array(arr, crop_height, crop_width):
+    n_layers, h, w = np.shape(arr)
+
+    if h <= crop_height and w <= crop_width:
+        temp = arr
+        temp_data = np.zeros([n_layers, crop_height, crop_width], 'float32')
+        temp_data[:, crop_height - h: crop_height, crop_width - w: crop_width] = temp
+    else:
+        start_x = int((w - crop_width) / 2)
+        start_y = int((h - crop_height) / 2)
+        arr = arr[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
+
+    return arr
+
+
 def test_transform(temp_data, crop_height, crop_width):
-    _, h, w=np.shape(temp_data)
+    _, h, w = np.shape(temp_data)
 
     if h <= crop_height and w <= crop_width:
         temp = temp_data
@@ -119,6 +135,7 @@ def test_transform(temp_data, crop_height, crop_width):
     right = np.ones([1, 3, crop_height, crop_width], 'float32')
     right[0, :, :, :] = temp_data[3: 6, :, :]
     return torch.from_numpy(left).float(), torch.from_numpy(right).float(), h, w
+
 
 def load_data(leftname, rightname):
     left = Image.open(leftname)
@@ -197,9 +214,9 @@ if __name__ == "__main__":
             rightname = file_path + current_file + '_RIGHT_RGB.tif'
 
             _, sample_name = current_file.rsplit('/', maxsplit=1)
-            dispname = file_path + 'Track2-Truth/' + current_file + '_LEFT_DSP.tif'
-            savename = opt.save_path + current_file + '.png'
-            disp = Image.open(dispname)
+            dispname = file_path + 'Track2-Truth/' + sample_name + '_LEFT_DSP.tif'
+            savename = opt.save_path + sample_name + '.png'
+            disp = np.asarray(Image.open(dispname))
 
         else:
             leftname = opt.data_path + 'frames_finalpass/' + current_file
@@ -209,6 +226,7 @@ if __name__ == "__main__":
             disp, height, width = readPFM(dispname)
        
         prediction = test(leftname, rightname, savename)
+        disp = crop_array(disp, opt.crop_height, opt.crop_width)
         mask = np.logical_and(disp >= 0.001, disp <= opt.max_disp)
 
         error = np.mean(np.abs(prediction[mask] - disp[mask]))

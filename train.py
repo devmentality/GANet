@@ -167,7 +167,7 @@ def val():
     return epoch_error2 / valid_iteration
 
 
-def save_checkpoint(save_path, epoch,state, is_best):
+def save_checkpoint(save_path, epoch, state, is_best):
     filename = save_path + "_epoch_{}.pth".format(epoch)
     torch.save(state, filename)
     if is_best:

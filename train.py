@@ -100,7 +100,7 @@ def train(epoch):
             input2 = input2.cuda()
             target = target.cuda()
 
-        target=torch.squeeze(target,1)
+        target = torch.squeeze(target, 1)
         mask = target < opt.max_disp
         mask.detach_()
         valid = target[mask].size()[0]
@@ -109,7 +109,7 @@ def train(epoch):
             
             if opt.model == 'GANet11':
                 disp1, disp2 = model(input1, input2)
-                disp0 = (disp1 + disp2)/2.
+                disp0 = (disp1 + disp2) / 2.
                 if opt.kitti or opt.kitti2015:
                     loss = 0.4 * F.smooth_l1_loss(disp1[mask], target[mask], reduction='mean') + 1.2 * criterion(disp2[mask], target[mask])
                 else:
@@ -117,9 +117,9 @@ def train(epoch):
             elif opt.model == 'GANet_deep':
                 disp0, disp1, disp2 = model(input1, input2)
                 if opt.kitti or opt.kitti2015:
-                    loss = 0.2 * F.smooth_l1_loss(disp0[mask], target[mask], reduction='mean') + 0.6 * F.smooth_l1_loss(disp1[mask], target[mask], reduction='mean') +  criterion(disp2[mask], target[mask])
+                    loss = 0.2 * F.smooth_l1_loss(disp0[mask], target[mask], reduction='mean') + 0.6 * F.smooth_l1_loss(disp1[mask], target[mask], reduction='mean') + criterion(disp2[mask], target[mask])
                 else:
-                    loss = 0.2 * F.smooth_l1_loss(disp0[mask], target[mask], reduction='mean') + 0.6 * F.smooth_l1_loss(disp1[mask], target[mask], reduction='mean') +  F.smooth_l1_loss(disp2[mask], target[mask], reduction='mean')
+                    loss = 0.2 * F.smooth_l1_loss(disp0[mask], target[mask], reduction='mean') + 0.6 * F.smooth_l1_loss(disp1[mask], target[mask], reduction='mean') + F.smooth_l1_loss(disp2[mask], target[mask], reduction='mean')
             else:
                 raise Exception("No suitable model found ...")
                 
@@ -155,9 +155,9 @@ def val():
         mask = target < opt.max_disp
         mask.detach_()
         valid = target[mask].size()[0]
-        if valid>0:
+        if valid > 0:
             with torch.no_grad():
-                disp2 = model(input1,input2)
+                disp2 = model(input1, input2)
                 error2 = torch.mean(torch.abs(disp2[mask] - target[mask]))
                 valid_iteration += 1
                 epoch_error2 += error2.item()      

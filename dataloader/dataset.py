@@ -238,8 +238,8 @@ def load_dfc2019_data(data_path, current_file):
     _, sample_name = current_file.rsplit('/', maxsplit=1)
     dispname = data_path + 'Track2-Truth/' + sample_name + '_LEFT_DSP.tif'
 
-    left = Image.open(leftname)
-    right = Image.open(rightname)
+    left = np.asarray(Image.open(leftname))
+    right = np.asarray(Image.open(rightname))
     disp = np.asarray(Image.open(dispname))
 
     print(f"DFC2019 loader. Left shape is {np.shape(left)}")
@@ -249,8 +249,6 @@ def load_dfc2019_data(data_path, current_file):
     width = size[1]
 
     temp_data = np.zeros([8, height, width], 'float32')
-    left = np.asarray(left)
-    right = np.asarray(right)
     r = left[:, :, 0]
     g = left[:, :, 1]
     b = left[:, :, 2]
@@ -264,7 +262,9 @@ def load_dfc2019_data(data_path, current_file):
     temp_data[4, :, :] = (g - np.mean(g[:])) / np.std(g[:])
     temp_data[5, :, :] = (b - np.mean(b[:])) / np.std(b[:])
     temp_data[6: 7, :, :] = width * 2
+    disp[disp < 0.1] = width * 2
     temp_data[6, :, :] = disp
+
     return temp_data
 
 
@@ -292,7 +292,7 @@ class DatasetFromList(data.Dataset):
             temp_data = load_dfc2019_data(self.data_path, self.file_list[index][:-1])
         else:
             temp_data = load_data(self.data_path, self.file_list[index])
-#
+
         if self.training:
             input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift)
             return input1, input2, target

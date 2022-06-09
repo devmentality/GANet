@@ -32,13 +32,16 @@ parser.add_argument('--cuda', type=int, default=1, help='use cuda? Default=True'
 parser.add_argument('--threads', type=int, default=1, help='number of threads for data loader to use')
 parser.add_argument('--seed', type=int, default=123, help='random seed to use. Default=123')
 parser.add_argument('--shift', type=int, default=0, help='random shift of left image. Default=0')
-parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
-parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
 parser.add_argument('--data_path', type=str, default='/ssd1/zhangfeihu/data/stereo/', help="data root")
 parser.add_argument('--training_list', type=str, default='./lists/sceneflow_train.list', help="training list")
 parser.add_argument('--val_list', type=str, default='./lists/sceneflow_test_select.list', help="validation list")
 parser.add_argument('--save_path', type=str, default='./checkpoint/', help="location to save models")
 parser.add_argument('--model', type=str, default='GANet_deep', help="model to train")
+
+# Datasets
+parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
+parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
+parser.add_argument('--dfc2019', type=int, default=0, help='DFC2019? Default=false')
 
 opt = parser.parse_args()
 
@@ -51,7 +54,7 @@ else:
     raise Exception("No suitable model found ...")
     
 cuda = opt.cuda
-#cuda = True
+
 if cuda and not torch.cuda.is_available():
     raise Exception("No GPU found, please run without --cuda")
 
@@ -71,7 +74,8 @@ model = GANet(opt.max_disp)
 criterion = MyLoss2(thresh=3, alpha=2)
 if cuda:
     model = torch.nn.DataParallel(model).cuda()
-optimizer=optim.Adam(model.parameters(), lr=opt.lr,betas=(0.9,0.999))
+optimizer = optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.999))
+
 if opt.resume:
     if os.path.isfile(opt.resume):
         print("=> loading checkpoint '{}'".format(opt.resume))
@@ -135,6 +139,7 @@ def train(epoch):
 
     print("===> Epoch {} Complete: Avg. Loss: {:.4f}, Avg. Error: ({:.4f} {:.4f} {:.4f})".format(epoch, epoch_loss / valid_iteration,epoch_error0/valid_iteration,epoch_error1/valid_iteration,epoch_error2/valid_iteration))
 
+
 def val():
     epoch_error2 = 0
 
@@ -161,12 +166,14 @@ def val():
     print("===> Test: Avg. Error: ({:.4f})".format(epoch_error2 / valid_iteration))
     return epoch_error2 / valid_iteration
 
+
 def save_checkpoint(save_path, epoch,state, is_best):
     filename = save_path + "_epoch_{}.pth".format(epoch)
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, save_path + '_best.pth')
     print("Checkpoint saved to {}".format(filename))
+
 
 def adjust_learning_rate(optimizer, epoch):
     if epoch <= 400:
@@ -177,37 +184,30 @@ def adjust_learning_rate(optimizer, epoch):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+
 if __name__ == '__main__':
-    error=100
+    error = 100
     for epoch in range(1, opt.nEpochs + 1):
-#        if opt.kitti or opt.kitti2015:
         adjust_learning_rate(optimizer, epoch)
         train(epoch)
         is_best = False
-#        loss=val()
-#        if loss < error:
-#            error=loss
-#            is_best = True
         if opt.kitti or opt.kitti2015:
-            if epoch%50 == 0 and epoch >= 300:
-                save_checkpoint(opt.save_path, epoch,{
+            if epoch % 50 == 0 and epoch >= 300:
+                save_checkpoint(opt.save_path, epoch, {
                         'epoch': epoch,
                         'state_dict': model.state_dict(),
                         'optimizer' : optimizer.state_dict(),
                     }, is_best)
         else:
-            if epoch>=8:
+            if epoch >= 8:
                 save_checkpoint(opt.save_path, epoch,{
                         'epoch': epoch,
                         'state_dict': model.state_dict(),
                         'optimizer' : optimizer.state_dict(),
                     }, is_best)
-
 
     save_checkpoint(opt.save_path, opt.nEpochs,{
             'epoch': opt.nEpochs,
             'state_dict': model.state_dict(),
             'optimizer' : optimizer.state_dict(),
         }, is_best)
-
-

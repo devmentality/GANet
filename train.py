@@ -1,6 +1,7 @@
 from __future__ import print_function
 import argparse
 from math import log10
+from math import isnan
 
 from libs.GANet.modules.GANet import MyLoss2
 import sys
@@ -133,7 +134,14 @@ def train(epoch):
                     loss = 0.2 * F.smooth_l1_loss(disp0[mask], target[mask], reduction='mean') + 0.6 * F.smooth_l1_loss(disp1[mask], target[mask], reduction='mean') + F.smooth_l1_loss(disp2[mask], target[mask], reduction='mean')
             else:
                 raise Exception("No suitable model found ...")
-                
+
+            if isnan(loss):
+                print('Shit happened!')
+                print(target)
+                print(disp0)
+                print(disp1)
+                print(disp2)
+
             loss.backward()
             optimizer.step()
             error0 = torch.mean(torch.abs(disp0[mask] - target[mask])) 
@@ -170,6 +178,7 @@ def val():
             input1 = input1.cuda()
             input2 = input2.cuda()
             target = target.cuda()
+
         target = torch.squeeze(target, 1)
         mask = (target >= 0.001) & (target <= opt.max_disp)
         mask.detach_()

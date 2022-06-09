@@ -193,10 +193,10 @@ def val():
 
 
 def save_checkpoint(save_path, epoch, state, is_best):
-    filename = save_path + "_epoch_{}.pth".format(epoch)
+    filename = save_path + "epoch_{}.pth".format(epoch)
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, save_path + '_best.pth')
+        shutil.copyfile(filename, save_path + 'best.pth')
     print("Checkpoint saved to {}".format(filename))
 
 
@@ -211,28 +211,19 @@ def adjust_learning_rate(optimizer, epoch):
 
 
 if __name__ == '__main__':
-    error = 100
+    min_loss = 100
     for epoch in range(1, opt.nEpochs + 1):
         adjust_learning_rate(optimizer, epoch)
         train(epoch)
+        loss = val()
         is_best = False
-        if opt.kitti or opt.kitti2015:
-            if epoch % 50 == 0 and epoch >= 300:
-                save_checkpoint(opt.save_path, epoch, {
-                        'epoch': epoch,
-                        'state_dict': model.state_dict(),
-                        'optimizer' : optimizer.state_dict(),
-                    }, is_best)
-        else:
-            if epoch >= 8:
-                save_checkpoint(opt.save_path, epoch, {
-                        'epoch': epoch,
-                        'state_dict': model.state_dict(),
-                        'optimizer' : optimizer.state_dict(),
-                    }, is_best)
+        if loss < min_loss:
+            min_loss = loss
+            is_best = True
 
-    save_checkpoint(opt.save_path, opt.nEpochs, {
-            'epoch': opt.nEpochs,
-            'state_dict': model.state_dict(),
-            'optimizer' : optimizer.state_dict(),
-        }, is_best)
+        if is_best or epoch % 10 == 0:
+            save_checkpoint(opt.save_path, epoch, {
+                    'epoch': epoch,
+                    'state_dict': model.state_dict(),
+                    'optimizer' : optimizer.state_dict(),
+                }, is_best)

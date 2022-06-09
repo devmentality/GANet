@@ -112,7 +112,7 @@ def train(epoch):
             target = target.cuda()
 
         target = torch.squeeze(target, 1)
-        mask = np.logical_and(target >= 0.001, target <= opt.max_disp)
+        mask = (target >= 0.001) & (target <= opt.max_disp)
         mask.detach_()
         valid = target[mask].size()[0]
         if valid > 0:
@@ -171,7 +171,7 @@ def val():
             input2 = input2.cuda()
             target = target.cuda()
         target = torch.squeeze(target, 1)
-        mask = target < opt.max_disp
+        mask = (target >= 0.001) & (target <= opt.max_disp)
         mask.detach_()
         valid = target[mask].size()[0]
         if valid > 0:

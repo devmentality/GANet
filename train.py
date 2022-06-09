@@ -17,6 +17,8 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from dataloader.data import get_training_set, get_test_set
 from torch.utils.tensorboard import SummaryWriter
+import numpy as np
+
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch GANet Example')
@@ -110,7 +112,7 @@ def train(epoch):
             target = target.cuda()
 
         target = torch.squeeze(target, 1)
-        mask = target < opt.max_disp
+        mask = np.logical_and(target >= 0.001, target <= opt.max_disp)
         mask.detach_()
         valid = target[mask].size()[0]
         if valid > 0:

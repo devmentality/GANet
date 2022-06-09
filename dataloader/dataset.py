@@ -97,8 +97,7 @@ def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=
 
 def test_transform(temp_data, crop_height, crop_width, left_right=False):
     _, h, w = np.shape(temp_data)
- #   if crop_height-h>20 or crop_width-w>20:
- #       print 'crop_size over size!'
+
     if h <= crop_height and w <= crop_width:
         temp = temp_data
         temp_data = np.zeros([8,crop_height,crop_width], 'float32')
@@ -107,6 +106,8 @@ def test_transform(temp_data, crop_height, crop_width, left_right=False):
     else:
         start_x = (w-crop_width)/2
         start_y = (h-crop_height)/2
+        print(start_x)
+        print(start_y)
         temp_data = temp_data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
    
     left = temp_data[0: 3, :, :]

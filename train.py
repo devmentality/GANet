@@ -106,7 +106,7 @@ def train(epoch):
     valid_iteration = 0
     model.train()
     for iteration, batch in enumerate(training_data_loader):
-        input1, input2, target = Variable(batch[0], requires_grad=True), Variable(batch[1], requires_grad=True), Variable(batch[2], requires_grad=False)
+        input1, input2, target = Variable(batch[0], requires_grad=True), Variable(batch[1], requires_grad=True), batch[2]
         if cuda:
             input1 = input1.cuda()
             input2 = input2.cuda()

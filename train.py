@@ -63,7 +63,7 @@ if cuda:
     torch.cuda.manual_seed(opt.seed)
 
 print('===> Loading datasets')
-train_set = get_training_set(opt.data_path, opt.training_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.shift)
+train_set = get_training_set(opt.data_path, opt.training_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.dfc2019, opt.shift)
 test_set = get_test_set(opt.data_path, opt.val_list, [576,960], opt.left_right, opt.kitti, opt.kitti2015)
 training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, batch_size=opt.batchSize, shuffle=True, drop_last=True)
 testing_data_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batch_size=opt.testBatchSize, shuffle=False)

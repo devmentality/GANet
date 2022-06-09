@@ -26,7 +26,7 @@ parser.add_argument('--resume', type=str, default='', help="resume from saved mo
 parser.add_argument('--left_right', type=int, default=0, help="use right view for training. Default=False")
 parser.add_argument('--batchSize', type=int, default=1, help='training batch size')
 parser.add_argument('--testBatchSize', type=int, default=1, help='testing batch size')
-parser.add_argument('--nEpochs', type=int, default=2048, help='number of epochs to train for')
+parser.add_argument('--nEpochs', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.001, help='Learning Rate. Default=0.001')
 parser.add_argument('--cuda', type=int, default=1, help='use cuda? Default=True')
 parser.add_argument('--threads', type=int, default=1, help='number of threads for data loader to use')
@@ -200,13 +200,13 @@ if __name__ == '__main__':
                     }, is_best)
         else:
             if epoch >= 8:
-                save_checkpoint(opt.save_path, epoch,{
+                save_checkpoint(opt.save_path, epoch, {
                         'epoch': epoch,
                         'state_dict': model.state_dict(),
                         'optimizer' : optimizer.state_dict(),
                     }, is_best)
 
-    save_checkpoint(opt.save_path, opt.nEpochs,{
+    save_checkpoint(opt.save_path, opt.nEpochs, {
             'epoch': opt.nEpochs,
             'state_dict': model.state_dict(),
             'optimizer' : optimizer.state_dict(),

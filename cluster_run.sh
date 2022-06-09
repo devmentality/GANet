@@ -1,0 +1,1 @@
+sbatch --mem=32000 --gres=gpu:k40m:3 --cpus-per-task=5 -t 10:00:00 --job-name=student --output='out_%j' --wrap="sh ./train_dfc2019.sh"

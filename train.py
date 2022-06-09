@@ -116,6 +116,8 @@ def train(epoch):
         mask = (target >= 0.001) & (target <= opt.max_disp)
         mask.detach_()
         valid = target[mask].size()[0]
+
+        print(f"Valid size {target[mask].size()}")
         if valid > 0:
             optimizer.zero_grad()
             

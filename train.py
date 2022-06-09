@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 #from models.GANet_deep import GANet
 import torch.nn.functional as F
 from dataloader.data import get_training_set, get_test_set
+from torch.utils.tensorboard import SummaryWriter
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch GANet Example')
@@ -37,6 +38,7 @@ parser.add_argument('--training_list', type=str, default='./lists/sceneflow_trai
 parser.add_argument('--val_list', type=str, default='./lists/sceneflow_test_select.list', help="validation list")
 parser.add_argument('--save_path', type=str, default='./checkpoint/', help="location to save models")
 parser.add_argument('--model', type=str, default='GANet_deep', help="model to train")
+parser.add_argument('--experiment', type=str, default='default')
 
 # Datasets
 parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
@@ -85,8 +87,15 @@ if opt.resume:
     else:
         print("=> no checkpoint found at '{}'".format(opt.resume))
 
+tb_dir = f'./logs/{opt.experiment}'
+tb_writer = SummaryWriter(tb_dir)
+
+val_step = 0
+train_step = 0
+
 
 def train(epoch):
+    global train_step
     epoch_loss = 0
     epoch_error0 = 0
     epoch_error1 = 0
@@ -135,12 +144,20 @@ def train(epoch):
             epoch_error1 += error1.item()
             epoch_error2 += error2.item()      
             print("===> Epoch[{}]({}/{}): Loss: {:.4f}, Error: ({:.4f} {:.4f} {:.4f})".format(epoch, iteration, len(training_data_loader), loss.item(), error0.item(), error1.item(), error2.item()))
+
+            tb_writer.add_scalar('Train loss', loss.item(), train_step + 1)
+            tb_writer.add_scalar('Train error', error2.item(), train_step + 1)
+            train_step += 1
+
             sys.stdout.flush()
 
-    print("===> Epoch {} Complete: Avg. Loss: {:.4f}, Avg. Error: ({:.4f} {:.4f} {:.4f})".format(epoch, epoch_loss / valid_iteration,epoch_error0/valid_iteration,epoch_error1/valid_iteration,epoch_error2/valid_iteration))
+    tb_writer.add_scalar('Avg epoch train loss', epoch_loss / valid_iteration, epoch)
+
+    print("===> Epoch {} Complete: Avg. Loss: {:.4f}, Avg. Error: ({:.4f} {:.4f} {:.4f})".format(epoch, epoch_loss / valid_iteration, epoch_error0 / valid_iteration, epoch_error1 / valid_iteration, epoch_error2 / valid_iteration))
 
 
 def val():
+    global val_step
     epoch_error2 = 0
 
     valid_iteration = 0
@@ -160,8 +177,14 @@ def val():
                 disp2 = model(input1, input2)
                 error2 = torch.mean(torch.abs(disp2[mask] - target[mask]))
                 valid_iteration += 1
-                epoch_error2 += error2.item()      
+                epoch_error2 += error2.item()
+
+                tb_writer.add_scalar('Validation error', error2.item(), val_step + 1)
+                val_step += 1
+
                 print("===> Test({}/{}): Error: ({:.4f})".format(iteration, len(testing_data_loader), error2.item()))
+
+    tb_writer.add_scalar('Avg epoch val error', epoch_error2 / valid_iteration, epoch)
 
     print("===> Test: Avg. Error: ({:.4f})".format(epoch_error2 / valid_iteration))
     return epoch_error2 / valid_iteration

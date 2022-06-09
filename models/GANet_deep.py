@@ -5,7 +5,8 @@ from libs.GANet.modules.GANet import DisparityRegression, GetCostVolume
 from libs.GANet.modules.GANet import MyNormalize
 from libs.GANet.modules.GANet import SGA
 from libs.GANet.modules.GANet import LGA, LGA2, LGA3
-from libs.sync_bn.modules.sync_bn import BatchNorm2d, BatchNorm3d
+# from libs.sync_bn.modules.sync_bn import BatchNorm2d, BatchNorm3d
+import apex
 
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -23,13 +24,13 @@ class BasicConv(nn.Module):
                 self.conv = nn.ConvTranspose3d(in_channels, out_channels, bias=False, **kwargs)
             else:
                 self.conv = nn.Conv3d(in_channels, out_channels, bias=False, **kwargs)
-            self.bn = BatchNorm3d(out_channels)
+            self.bn = apex.parallel.SyncBatchNorm(out_channels)
         else:
             if deconv:
                 self.conv = nn.ConvTranspose2d(in_channels, out_channels, bias=False, **kwargs)
             else:
                 self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kwargs)
-            self.bn = BatchNorm2d(out_channels)
+            self.bn = apex.parallel.SyncBatchNorm(out_channels)
 
     def forward(self, x):
         x = self.conv(x)
@@ -251,12 +252,12 @@ class SGABlock(nn.Module):
         super(SGABlock, self).__init__()
         self.refine = refine
         if self.refine:
-            self.bn_relu = nn.Sequential(BatchNorm3d(channels),
+            self.bn_relu = nn.Sequential(apex.parallel.SyncBatchNorm(channels),
                                          nn.ReLU(inplace=True))
             self.conv_refine = BasicConv(channels, channels, is_3d=True, kernel_size=3, padding=1, relu=False)
 #            self.conv_refine1 = BasicConv(8, 8, is_3d=True, kernel_size=1, padding=1)
         else:
-            self.bn = BatchNorm3d(channels)
+            self.bn = apex.parallel.SyncBatchNorm(channels)
         self.SGA=SGA()
         self.relu = nn.ReLU(inplace=True)
     def forward(self, x, g):
@@ -371,7 +372,7 @@ class GANet(nn.Module):
         self.conv_x = BasicConv(32, 32, kernel_size=3, padding=1)
         self.conv_y = BasicConv(32, 32, kernel_size=3, padding=1)
         self.conv_refine = nn.Conv2d(32, 32, (3, 3), (1, 1), (1,1), bias=False)
-        self.bn_relu = nn.Sequential(BatchNorm2d(32),
+        self.bn_relu = nn.Sequential(apex.parallel.SyncBatchNorm(32),
                                      nn.ReLU(inplace=True))
         self.feature = Feature()
         self.guidance = Guidance()
@@ -381,7 +382,7 @@ class GANet(nn.Module):
         for m in self.modules():
             if isinstance(m, (nn.Conv2d, nn.Conv3d)):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, (BatchNorm2d, BatchNorm3d)):
+            elif isinstance(m, (apex.parallel.SyncBatchNorm, apex.parallel.SyncBatchNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 

@@ -242,7 +242,7 @@ def load_dfc2019_data(data_path, current_file):
     right = np.asarray(Image.open(rightname))
     disp = np.asarray(Image.open(dispname))
 
-    print(f"DFC2019 loader. Left shape is {np.shape(left)}")
+    # print(f"DFC2019 loader. Left shape is {np.shape(left)}")
 
     size = np.shape(left)
     height = size[0]

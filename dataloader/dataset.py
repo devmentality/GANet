@@ -95,11 +95,6 @@ def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=
         left = temp_data[0: 3, :, :]
         right = temp_data[3: 6, :, :]
         target = temp_data[6: 7, :, :]
-
-        print(f"left shape {np.shape(left)}")
-        print(f"right shape {np.shape(right)}")
-        print(f"target shape {np.shape(target)}")
-
         return left, right, target
 
 

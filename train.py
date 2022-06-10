@@ -104,18 +104,12 @@ def train(epoch):
     epoch_error1 = 0
     epoch_error2 = 0
     valid_iteration = 0
-    model.train()
     for iteration, batch in enumerate(training_data_loader):
         input1, input2, target = Variable(batch[0], requires_grad=True), Variable(batch[1], requires_grad=True), batch[2]
         if cuda:
             input1 = input1.cuda()
             input2 = input2.cuda()
             target = target.cuda()
-
-        print(f"input1 shape {np.shape(input1)}")
-        print(f"input2 shape {np.shape(input2)}")
-        print(f"target shape {np.shape(target)}")
-
 
         target = torch.squeeze(target, 1)
         mask = (target >= 0.001) & (target <= opt.max_disp)
@@ -124,6 +118,7 @@ def train(epoch):
 
         print(f"Valid size {target[mask].size()}")
         if valid > 0:
+            model.train()
             optimizer.zero_grad()
             
             if opt.model == 'GANet11':
@@ -142,7 +137,6 @@ def train(epoch):
             else:
                 raise Exception("No suitable model found ...")
 
-            print(f"Disp2 shape {np.shape(disp2)}")
             if isnan(loss):
                 print('Shit happened!')
                 print(target)

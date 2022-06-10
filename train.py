@@ -188,6 +188,7 @@ def val():
         if valid > 0:
             with torch.no_grad():
                 disp2 = model(input1, input2)
+                print(f"Disp2 {disp2}")
                 error2 = torch.mean(torch.abs(disp2[mask] - target[mask]))
                 valid_iteration += 1
                 epoch_error2 += error2.item()

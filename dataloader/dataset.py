@@ -73,7 +73,7 @@ def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=
         start_y = random.randint(0, h - crop_height)
         left = temp_data[0: 3, start_y: start_y + crop_height, start_x + shift_x: start_x + shift_x + crop_width]
         right = temp_data[3: 6, start_y: start_y + crop_height, start_x: start_x + crop_width]
-        target = temp_data[6: 7, start_y: start_y + crop_height, start_x + shift_x : start_x+shift_x + crop_width]
+        target = temp_data[6: 7, start_y: start_y + crop_height, start_x + shift_x: start_x+shift_x + crop_width]
         target = target - shift_x
         return left, right, target
 
@@ -115,7 +115,6 @@ def test_transform(temp_data, crop_height, crop_width, left_right=False):
     left = temp_data[0: 3, :, :]
     right = temp_data[3: 6, :, :]
     target = temp_data[6: 7, :, :]
-  #  sign=np.ones([1,1,1],'float32')*-1
     return left, right, target
 
 

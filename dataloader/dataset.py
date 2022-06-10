@@ -104,10 +104,9 @@ def test_transform(temp_data, crop_height, crop_width, left_right=False):
         temp_data[6: 7, :, :] = 1000
         temp_data[:, crop_height - h: crop_height, crop_width - w: crop_width] = temp
     else:
-        start_x = (w-crop_width)/2
-        start_y = (h-crop_height)/2
-        print(start_x)
-        print(start_y)
+        start_x = (w - crop_width) // 2
+        start_y = (h - crop_height) // 2
+
         temp_data = temp_data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
    
     left = temp_data[0: 3, :, :]
@@ -135,7 +134,7 @@ def load_data(data_path, current_file):
     right = np.asarray(right)
     r = left[:, :, 0]
     g = left[:, :, 1]
-    b = left[:,:,2]
+    b = left[:, :, 2]
     temp_data[0, :, :] = (r - np.mean(r[:])) / np.std(r[:])
     temp_data[1, :, :] = (g - np.mean(g[:])) / np.std(g[:])
     temp_data[2, :, :] = (b - np.mean(b[:])) / np.std(b[:])
@@ -236,8 +235,13 @@ def load_kitti2015_data(file_path, current_file):
 def load_dfc2019_data(data_path, current_file):
     leftname = data_path + current_file + '_LEFT_RGB.tif'
     rightname = data_path + current_file + '_RIGHT_RGB.tif'
-    _, sample_name = current_file.rsplit('/', maxsplit=1)
-    dispname = data_path + 'Track2-Truth/' + sample_name + '_LEFT_DSP.tif'
+
+    # Loading DSP file. Training fails, loss becomes NaN at some point.
+    # _, sample_name = current_file.rsplit('/', maxsplit=1)
+    # dispname = data_path + 'Track2-Truth/' + sample_name + '_LEFT_DSP.tif'
+
+    # Loading AGL -- lidar data.
+    dispname = data_path + current_file + '_LEFT_AGL.tif'
 
     left = np.asarray(Image.open(leftname))
     right = np.asarray(Image.open(rightname))

@@ -112,12 +112,16 @@ def train(epoch):
             input2 = input2.cuda()
             target = target.cuda()
 
+        print(f"input1 shape {np.shape(input1)}")
+        print(f"input2 shape {np.shape(input2)}")
+        print(f"target shape {np.shape(target)}")
+
+
         target = torch.squeeze(target, 1)
         mask = (target >= 0.001) & (target <= opt.max_disp)
         mask.detach_()
         valid = target[mask].size()[0]
 
-        print(np.shape(target))
         print(f"Valid size {target[mask].size()}")
         if valid > 0:
             optimizer.zero_grad()
@@ -138,7 +142,7 @@ def train(epoch):
             else:
                 raise Exception("No suitable model found ...")
 
-
+            print(f"Disp2 shape {np.shape(disp2)}")
             if isnan(loss):
                 print('Shit happened!')
                 print(target)

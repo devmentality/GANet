@@ -57,15 +57,13 @@ def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=
         temp_data[6:7,:,:] = 1000
         temp_data[:, h + shift - h: h + shift, crop_width + shift - w: crop_width + shift] = temp
         _, h, w = np.shape(temp_data)
-        print("h > crop_height and w <= crop_width")
-   
+
     if h <= crop_height and w <= crop_width:
         temp = temp_data
         temp_data = np.zeros([8, crop_height + shift, crop_width + shift], 'float32')
         temp_data[6: 7, :, :] = 1000
         temp_data[:, crop_height + shift - h: crop_height + shift, crop_width + shift - w: crop_width + shift] = temp
         _, h, w = np.shape(temp_data)
-        print("h <= crop_height and w <= crop_width")
 
     if shift > 0:
         start_x = random.randint(0, w - crop_width)
@@ -77,31 +75,31 @@ def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=
         right = temp_data[3: 6, start_y: start_y + crop_height, start_x: start_x + crop_width]
         target = temp_data[6: 7, start_y: start_y + crop_height, start_x + shift_x : start_x+shift_x + crop_width]
         target = target - shift_x
-        print("shift > 0")
         return left, right, target
 
     if h <= crop_height and w <= crop_width:
         temp = temp_data
         temp_data = np.zeros([8, crop_height, crop_width], 'float32')
         temp_data[:, crop_height - h: crop_height, crop_width - w: crop_width] = temp
-        print("h <= crop_height and w <= crop_width")
     else:
         start_x = random.randint(0, w - crop_width)
         start_y = random.randint(0, h - crop_height)
         temp_data = temp_data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
-        print("else h <= crop_height and w <= crop_width")
 
     if random.randint(0, 1) == 0 and left_right:
         right = temp_data[0: 3, :, :]
         left = temp_data[3: 6, :, :]
         target = temp_data[7: 8, :, :]
-        print("random.randint(0, 1) == 0 and left_right")
         return left, right, target
     else:
         left = temp_data[0: 3, :, :]
         right = temp_data[3: 6, :, :]
         target = temp_data[6: 7, :, :]
-        print("else random.randint(0, 1) == 0 and left_right")
+
+        print(f"left shape {np.shape(left)}")
+        print(f"right shape {np.shape(right)}")
+        print(f"target shape {np.shape(target)}")
+
         return left, right, target
 
 

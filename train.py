@@ -173,7 +173,6 @@ def val():
     epoch_error2 = 0
 
     valid_iteration = 0
-    model.eval()
     for iteration, batch in enumerate(testing_data_loader):
         input1, input2, target = Variable(batch[0],requires_grad=False), Variable(batch[1], requires_grad=False), Variable(batch[2], requires_grad=False)
         if cuda:
@@ -186,6 +185,8 @@ def val():
         mask.detach_()
         valid = target[mask].size()[0]
         if valid > 0:
+            model.eval()
+
             with torch.no_grad():
                 disp2 = model(input1, input2)
                 print(f"Disp2 {disp2}")

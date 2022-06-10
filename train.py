@@ -69,8 +69,8 @@ if cuda:
 
 print('===> Loading datasets')
 train_set = get_training_set(opt.data_path, opt.training_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.dfc2019, opt.shift)
-test_set = get_test_set(opt.data_path, opt.val_list, [576, 960], opt.left_right, opt.kitti, opt.kitti2015, opt.dfc2019)
-training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, batch_size=opt.batchSize, shuffle=True, drop_last=True)
+test_set = get_test_set(opt.data_path, opt.val_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.dfc2019)
+training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, batch_size=opt.batchSize, shuffle=False, drop_last=True)
 testing_data_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batch_size=opt.testBatchSize, shuffle=False)
 
 print('===> Building model')
@@ -117,6 +117,7 @@ def train(epoch):
         mask.detach_()
         valid = target[mask].size()[0]
 
+        print(np.shape(target))
         print(f"Valid size {target[mask].size()}")
         if valid > 0:
             optimizer.zero_grad()
@@ -136,6 +137,7 @@ def train(epoch):
                     loss = 0.2 * F.smooth_l1_loss(disp0[mask], target[mask], reduction='mean') + 0.6 * F.smooth_l1_loss(disp1[mask], target[mask], reduction='mean') + F.smooth_l1_loss(disp2[mask], target[mask], reduction='mean')
             else:
                 raise Exception("No suitable model found ...")
+
 
             if isnan(loss):
                 print('Shit happened!')

@@ -267,7 +267,7 @@ def load_dfc2019_data(data_path, current_file):
     temp_data[4, :, :] = (g - np.mean(g[:])) / np.std(g[:])
     temp_data[5, :, :] = (b - np.mean(b[:])) / np.std(b[:])
     temp_data[6: 7, :, :] = width * 2
-    disp[disp < 0.1] = width * 2
+    disp[disp < 0.001] = width * 2
     temp_data[6, :, :] = disp
 
     return temp_data

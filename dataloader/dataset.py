@@ -287,7 +287,6 @@ def read_disparity_image(file_name: str) -> np.ndarray:
     image = Image.open(file_name)
     data = np.asarray(image)
     disparity_map = np.apply_along_axis(transform_to_disparity, 2, data)
-
     return disparity_map
 
 
@@ -303,9 +302,10 @@ def load_data_satellite(data_path, current_file):
     disp_right = read_disparity_image(disp_right_name)
 
     height, width, _ = left.shape
+    disp_left[disp_left < 0.001] = 2 * width
+    disp_right[disp_right < 0.001] = 2 * width
 
-    print(f'Loaded sample from {current_file}, size {height} x {width}')
-
+    #print(f'Loaded sample from {current_file}, size {height} x {width}')
     temp_data = np.zeros([8, height, width], 'float32')
 
     r = left[:, :, 0]

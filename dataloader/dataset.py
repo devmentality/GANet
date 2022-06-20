@@ -9,6 +9,7 @@ import random
 from struct import unpack
 import re
 import sys
+import os.path
 
 
 def readPFM(file): 
@@ -239,11 +240,11 @@ def load_dfc2019_data(data_path, current_file):
     rightname = data_path + current_file + '_RIGHT_RGB.tif'
 
     # Loading DSP file. Training fails, loss becomes NaN at some point.
-    # _, sample_name = current_file.rsplit('/', maxsplit=1)
-    # dispname = data_path + 'Track2-Truth/' + sample_name + '_LEFT_DSP.tif'
+    _, sample_name = current_file.rsplit('/', maxsplit=1)
+    dispname = data_path + 'Track2-Truth/' + sample_name + '_LEFT_DSP.tif'
 
     # Loading AGL -- lidar data.
-    dispname = data_path + current_file + '_LEFT_AGL.tif'
+    # dispname = data_path + current_file + '_LEFT_AGL.tif'
 
     left = np.asarray(Image.open(leftname))
     right = np.asarray(Image.open(rightname))
@@ -275,8 +276,59 @@ def load_dfc2019_data(data_path, current_file):
     return temp_data
 
 
+def transform_to_disparity(pixel_data: np.ndarray):
+    if pixel_data[0] == pixel_data[1] == pixel_data[2]:
+        return pixel_data[0]
+    else:
+        return 0
+
+
+def read_disparity_image(file_name: str) -> np.ndarray:
+    image = Image.open(file_name)
+    data = np.asarray(image)
+    disparity_map = np.apply_along_axis(transform_to_disparity, 2, data)
+
+    return disparity_map
+
+
+def load_data_satellite(data_path, current_file):
+    left_name = os.path.join(data_path, current_file, 'satiml.png')
+    right_name = os.path.join(data_path, current_file, 'satimr.png')
+    disp_left_name = os.path.join(data_path, current_file, 'disparityl.png')
+    disp_right_name = os.path.join(data_path, current_file, 'disparityr.png')
+
+    left = np.asarray(Image.open(left_name))
+    right = np.asarray(Image.open(right_name))
+    disp_left = read_disparity_image(disp_left_name)
+    disp_right = read_disparity_image(disp_right_name)
+
+    height, width, _ = left.shape
+
+    print(f'Loaded sample from {current_file}, size {height} x {width}')
+
+    temp_data = np.zeros([8, height, width], 'float32')
+
+    r = left[:, :, 0]
+    g = left[:, :, 1]
+    b = left[:, :, 2]
+    temp_data[0, :, :] = (r - np.mean(r[:])) / np.std(r[:])
+    temp_data[1, :, :] = (g - np.mean(g[:])) / np.std(g[:])
+    temp_data[2, :, :] = (b - np.mean(b[:])) / np.std(b[:])
+    r = right[:, :, 0]
+    g = right[:, :, 1]
+    b = right[:, :, 2]
+    temp_data[3, :, :] = (r - np.mean(r[:])) / np.std(r[:])
+    temp_data[4, :, :] = (g - np.mean(g[:])) / np.std(g[:])
+    temp_data[5, :, :] = (b - np.mean(b[:])) / np.std(b[:])
+
+    temp_data[6, :, :] = disp_left
+    temp_data[7, :, :] = disp_right
+
+    return temp_data
+
+
 class DatasetFromList(data.Dataset): 
-    def __init__(self, data_path, file_list, crop_size=[256, 256], training=True, left_right=False, kitti=False, kitti2015=False, dfc2019=False, shift=0):
+    def __init__(self, data_path, file_list, crop_size=[256, 256], training=True, left_right=False, kitti=False, kitti2015=False, satellite=False, shift=0):
         super(DatasetFromList, self).__init__()
         f = open(file_list, 'r')
         self.data_path = data_path
@@ -287,7 +339,7 @@ class DatasetFromList(data.Dataset):
         self.left_right = left_right
         self.kitti = kitti
         self.kitti2015 = kitti2015
-        self.dfc2019 = dfc2019
+        self.satellite = satellite
         self.shift = shift
 
     def __getitem__(self, index):
@@ -295,8 +347,8 @@ class DatasetFromList(data.Dataset):
             temp_data = load_kitti_data(self.data_path, self.file_list[index])
         elif self.kitti2015:
             temp_data = load_kitti2015_data(self.data_path, self.file_list[index])
-        elif self.dfc2019:
-            temp_data = load_dfc2019_data(self.data_path, self.file_list[index][:-1])
+        elif self.satellite:
+            temp_data = load_data_satellite(self.data_path, self.file_list[index][:-1])
         else:
             temp_data = load_data(self.data_path, self.file_list[index])
 

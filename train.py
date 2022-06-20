@@ -46,7 +46,7 @@ parser.add_argument('--experiment', type=str, default='default')
 # Datasets
 parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
 parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
-parser.add_argument('--dfc2019', type=int, default=0, help='DFC2019? Default=false')
+parser.add_argument('--satellite', type=int, default=0, help='Satellite? Default=false')
 
 opt = parser.parse_args()
 
@@ -68,8 +68,8 @@ if cuda:
     torch.cuda.manual_seed(opt.seed)
 
 print('===> Loading datasets')
-train_set = get_training_set(opt.data_path, opt.training_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.dfc2019, opt.shift)
-test_set = get_test_set(opt.data_path, opt.val_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.dfc2019)
+train_set = get_training_set(opt.data_path, opt.training_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.satellite, opt.shift)
+test_set = get_test_set(opt.data_path, opt.val_list, [opt.crop_height, opt.crop_width], opt.left_right, opt.kitti, opt.kitti2015, opt.satellite)
 training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, batch_size=opt.batchSize, shuffle=False, drop_last=True)
 testing_data_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batch_size=opt.testBatchSize, shuffle=False)
 

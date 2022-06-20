@@ -171,7 +171,7 @@ def train(epoch):
 
 def calculate_validity_mask(target):
     # Zeros in target are occlusions
-    return (target < opt.maxdisp) & (target > 0.001)
+    return (target < opt.max_disp) & (target > 0.001)
 
 
 def val():
@@ -196,7 +196,7 @@ def val():
 
             with torch.no_grad():
                 disp2 = model(input1, input2)
-                print(f"Disp2 {disp2}")
+                # print(f"Disp2 {disp2}")
                 error2 = torch.mean(torch.abs(disp2[mask] - target[mask]))
                 valid_iteration += 1
                 epoch_error2 += error2.item()

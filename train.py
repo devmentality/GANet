@@ -158,19 +158,26 @@ def train(epoch):
             print("===> Epoch[{}]({}/{}): Loss: {:.4f}, Error: ({:.4f} {:.4f} {:.4f})".format(epoch, iteration, len(training_data_loader), loss.item(), error0.item(), error1.item(), error2.item()))
 
             tb_writer.add_scalar('Train loss', loss.item(), train_step + 1)
-            tb_writer.add_scalar('Train error', error2.item(), train_step + 1)
+            tb_writer.add_scalar('Train EPE', error2.item(), train_step + 1)
             train_step += 1
 
             sys.stdout.flush()
 
-    tb_writer.add_scalar('Avg epoch train loss', epoch_loss / valid_iteration, epoch)
+    # tb_writer.add_scalar('Avg epoch train loss', epoch_loss / valid_iteration, epoch)
+    tb_writer.add_scalar('Train Epoch EPE', epoch_error2 / valid_iteration, epoch)
 
     print("===> Epoch {} Complete: Avg. Loss: {:.4f}, Avg. Error: ({:.4f} {:.4f} {:.4f})".format(epoch, epoch_loss / valid_iteration, epoch_error0 / valid_iteration, epoch_error1 / valid_iteration, epoch_error2 / valid_iteration))
+
+
+def calculate_validity_mask(target):
+    # Zeros in target are occlusions
+    return (target < opt.maxdisp) & (target > 0.001)
 
 
 def val():
     global val_step
     epoch_error2 = 0
+    three_px_error_all = 0
 
     valid_iteration = 0
     for iteration, batch in enumerate(testing_data_loader):
@@ -194,15 +201,31 @@ def val():
                 valid_iteration += 1
                 epoch_error2 += error2.item()
 
-                tb_writer.add_scalar('Validation error', error2.item(), val_step + 1)
+                predicted_disparity = disp2.cpu().detach().numpy()
+                true_disparity = target.cpu().detach().numpy()
+                shape = true_disparity.shape
+                mask = calculate_validity_mask(true_disparity)
+                abs_diff = np.full(shape, 10000)
+                abs_diff[mask] = np.abs(true_disparity[mask] - predicted_disparity[mask])
+                correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
+
+                three_px_error = 1 - (float(np.sum(correct)) / float(len(np.argwhere(mask))))
+                three_px_error_all += three_px_error
+
+                tb_writer.add_scalar('Validation EPE', error2.item(), val_step + 1)
+                tb_writer.add_scalar('Validation 3px error', three_px_error, val_step + 1)
+
                 val_step += 1
 
                 print("===> Test({}/{}): Error: ({:.4f})".format(iteration, len(testing_data_loader), error2.item()))
 
-    tb_writer.add_scalar('Avg epoch val error', epoch_error2 / valid_iteration, epoch)
+    avg_three_px_error = three_px_error_all / valid_iteration
+    avg_epe = epoch_error2 / valid_iteration
+    tb_writer.add_scalar('Validation Epoch EPE', avg_epe, epoch)
+    tb_writer.add_scalar('Validation Epoch 3px error', avg_three_px_error, epoch)
 
     print("===> Test: Avg. Error: ({:.4f})".format(epoch_error2 / valid_iteration))
-    return epoch_error2 / valid_iteration
+    return avg_three_px_error
 
 
 def save_checkpoint(save_path, epoch, state, is_best):

@@ -1,6 +1,6 @@
 CUDA_VISIBLE_DEVICES="0,1,2" python train.py \
                 --batchSize=3 \
-                --crop_height=384 \
+                --crop_height=240 \
                 --crop_width=528 \
                 --max_disp=192 \
                 --thread=8 \

@@ -1,12 +1,12 @@
 CUDA_VISIBLE_DEVICES="0,1,2" python train.py \
                 --batchSize=3 \
-                --crop_height=240 \
+                --crop_height=384 \
                 --crop_width=528 \
                 --max_disp=192 \
                 --thread=8 \
-                --data_path='/home/s0212/_scratch/mvs3d/' \
-                --training_list='./lists/dfc2_train.list' \
-                --val_list='./lists/dfc2_test.list' \
+                --data_path='/home/s0212/_scratch/l2d_ntagil_20220319/' \
+                --training_list='./lists/satellite_train_.list' \
+                --val_list='./lists/satellite_test_.list' \
                 --resume='./checkpoints/sceneflow_epoch_10.pth' \
                 --model='GANet_deep' \
-                --dfc2019=1
+                --satellite=1

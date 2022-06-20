@@ -5,6 +5,7 @@ CUDA_VISIBLE_DEVICES="0,1,2" python train.py \
                 --max_disp=192 \
                 --thread=8 \
                 --data_path='/home/s0212/_scratch/l2d_ntagil_20220319/' \
+                --save_path='./checkpoints/satellite/' \
                 --training_list='./lists/satellite_train_.list' \
                 --val_list='./lists/satellite_test_.list' \
                 --resume='./checkpoints/sceneflow_epoch_10.pth' \

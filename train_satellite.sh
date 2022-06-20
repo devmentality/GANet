@@ -10,4 +10,5 @@ CUDA_VISIBLE_DEVICES="0,1,2" python train.py \
                 --val_list='./lists/satellite_test_.list' \
                 --resume='./checkpoints/sceneflow_epoch_10.pth' \
                 --model='GANet_deep' \
-                --satellite=1
+                --satellite=1 \
+                --experiment=satellite
